@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import AuthLayout from '../components/AuthLayout'
+import LanguageSelect from '../components/LanguageSelect'
 import { Field, PasswordField, SubmitButton } from '../components/Field'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -54,10 +55,19 @@ export default function Login() {
       subtitle="Log in to check on your fields, orders and market prices."
       aside={
         <>
-          <p className="font-serif text-4xl leading-tight font-medium">
-            The best time to plant a tree was twenty years ago.
+          <p className="font-serif text-2xl leading-tight font-medium">
+            Turning Agricultural Data into Actionable Insights and Smarter Farming Decisions for Farmers and Agribusinesses 
           </p>
-          <p className="mt-4 text-leaf-100">The second best time is now.</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Link
+              to="/about"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-leaf-900 transition hover:bg-leaf-500 hover:text-white"
+            >
+              Learn more
+              <span aria-hidden="true">→</span>
+            </Link>
+            <LanguageSelect />
+          </div>
         </>
       }
     >

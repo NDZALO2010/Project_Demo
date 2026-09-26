@@ -4,16 +4,19 @@ import { BrowserRouter } from 'react-router'
 import App from './App'
 import { FarmProvider } from './state/FarmContext'
 import { MonitoringProvider } from './state/MonitoringContext'
+import { LanguageProvider } from './state/LanguageContext'
 import './index.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <FarmProvider>
-        <MonitoringProvider>
-          <App />
-        </MonitoringProvider>
-      </FarmProvider>
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <FarmProvider>
+          <MonitoringProvider>
+            <App />
+          </MonitoringProvider>
+        </FarmProvider>
+      </BrowserRouter>
+    </LanguageProvider>
   </StrictMode>,
 )

@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Onboarding from './pages/Onboarding'
+import About from './pages/About'
 import Dashboard from './pages/Dashboard'
 import Fields from './pages/Fields'
 import FieldDetail from './pages/FieldDetail'
@@ -21,6 +22,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/about" element={<About />} />
       <Route path="/onboarding" element={<Onboarding />} />
 
       <Route
