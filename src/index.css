@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/*
+  Palette pulled from the farm itself — leaf, soil, straw and linen.
+  Everything is a flat solid colour on purpose, no gradients.
+*/
+@theme {
+  --color-leaf-50: #eef3ea;
+  --color-leaf-100: #dbe6d3;
+  --color-leaf-500: #5e8c4a;
+  --color-leaf-700: #3f6b3a;
+  --color-leaf-800: #2f5230;
+  --color-leaf-900: #233d24;
+
+  --color-soil-400: #8a6a4d;
+  --color-soil-600: #6b4a2e;
+  --color-soil-900: #3b2a1c;
+
+  --color-wheat: #e8d8a8;
+  --color-straw: #d9a441;
+  --color-linen: #f6f1e4;
+  --color-clay: #b5552f;
+
+  /* chart-only: rainfall vs. crop water demand (checked for colourblind separation) */
+  --color-rain: #2f75b0;
+  --color-harvest: #c9892a;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+}
+
+body {
+  @apply bg-linen font-sans text-soil-900 antialiased;
+}
