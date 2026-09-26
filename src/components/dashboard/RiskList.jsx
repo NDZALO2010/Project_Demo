@@ -1,13 +1,14 @@
 import { cropName } from '../../lib/crops'
 import { randsShort, tonnes } from '../../lib/format'
 import PriorityBadge, { StatusTag } from './PriorityBadge'
+import { VerdictTag } from './WorthItPanel'
 
 export default function RiskList({ risks, selectedKey, onSelect }) {
   return (
     <section className="rounded-xl border border-wheat bg-white">
       <header className="border-b border-wheat px-5 py-4">
         <h2 className="font-serif text-lg font-semibold text-leaf-900">Where attention is needed first</h2>
-        <p className="text-sm text-soil-400">Sorted by priority, then by how much revenue could be exposed.</p>
+        <p className="text-sm text-soil-400">Most urgent first, then by the income you could miss out on (estimates).</p>
       </header>
 
       {risks.length === 0 ? (
@@ -39,13 +40,18 @@ export default function RiskList({ risks, selectedKey, onSelect }) {
                       <span>
                         {cropName(risk.field.crop)} · {risk.affectedHa} ha · {tonnes(risk.yieldAtRisk)} at risk
                       </span>
+                      <VerdictTag risk={risk} />
                       <StatusTag action={risk.action} />
                     </span>
                   </span>
 
                   <span className="flex flex-col items-end gap-1">
                     <PriorityBadge priority={risk.priority} suffix="" />
-                    <span className="text-sm font-semibold text-soil-900 tabular-nums">{randsShort(risk.revenueExposure)}</span>
+                    {risk.revenueExposure === null ? (
+                      <span className="text-sm text-soil-400">No price</span>
+                    ) : (
+                      <span className="text-sm font-semibold text-soil-900 tabular-nums">{randsShort(risk.revenueExposure)}</span>
+                    )}
                   </span>
                 </button>
               </li>

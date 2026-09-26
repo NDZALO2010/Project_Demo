@@ -1,8 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useFarm } from './FarmContext'
+import { usePrices } from './PriceContext'
 import { fetchWeather, sampleWeather, summarizeWeather } from '../services/weather'
 import { simulateSatellite } from '../services/satellite'
 import { detectRisk, rankRisks } from '../lib/engine'
+import { assessAction } from '../lib/finance'
+import { costLinesFor } from '../lib/actionCosts'
+import { priceForField } from '../services/prices'
 
 // Fields a few km apart share the same weather cell, so round the coords
 // and only call the API once per ~10 km square.
@@ -13,7 +17,8 @@ function weatherKey(field) {
 const MonitoringContext = createContext(null)
 
 export function MonitoringProvider({ children }) {
-  const { fields, actions } = useFarm()
+  const { fields, actions, costOverrides, settings } = useFarm()
+  const { prices } = usePrices()
   const [weather, setWeather] = useState({})
   const [loading, setLoading] = useState(false)
   const [syncedAt, setSyncedAt] = useState(null)
@@ -69,10 +74,22 @@ export function MonitoringProvider({ children }) {
 
       const summary = summarizeWeather(raw)
       const satellite = simulateSatellite(field, summary)
-      const risk = detectRisk(field, summary, satellite)
+      const risk = detectRisk(field, summary, satellite, priceForField(field, prices))
 
       if (risk) {
         risk.action = actions[risk.key] ?? null
+
+        // DECIDE: what acting would cost and what it would likely save
+        const overrides = costOverrides[risk.key]
+        const lines = costLinesFor(risk.type, overrides)
+        const customRecovery = overrides != null && 'recoveryPct' in overrides
+        const recoveryPct = overrides?.recoveryPct ?? settings.recoveryPct
+        risk.plan = {
+          lines,
+          customRecovery,
+          recoveryInput: customRecovery ? overrides.recoveryPct : recoveryPct,
+          ...assessAction({ exposure: risk.revenueExposure, lines, affectedHa: risk.affectedHa, recoveryPct }),
+        }
         risks.push(risk)
       }
       byField[field.id] = { field, weather: raw, summary, satellite, risk }
@@ -84,9 +101,10 @@ export function MonitoringProvider({ children }) {
       risks: rankRisks(risks),
       weatherSource: sources.size > 1 ? 'mixed' : ([...sources][0] ?? null),
     }
-  }, [fields, weather, actions])
+  }, [fields, weather, actions, costOverrides, settings, prices])
 
-  const ready = fields.length > 0 && fields.every((f) => weather[weatherKey(f)])
+  // wait for prices too, so the numbers don't flash "Add a price" on load
+  const ready = prices !== null && fields.length > 0 && fields.every((f) => weather[weatherKey(f)])
 
   const value = useMemo(
     () => ({ ...analysis, loading, ready, syncedAt, refresh }),

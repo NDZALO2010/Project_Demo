@@ -6,6 +6,7 @@ const icons = {
   dashboard: 'M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z',
   fields: 'M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3V7Zm6-3v13m6-10v13',
   add: 'M12 5v14M5 12h14',
+  prices: 'M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8ZM7.5 7.5h.01',
 }
 
 export function Icon({ name, className = 'h-5 w-5' }) {
@@ -20,6 +21,7 @@ const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { to: '/fields', label: 'Fields', icon: 'fields', end: true },
   { to: '/fields/new', label: 'Add field', icon: 'add' },
+  { to: '/prices', label: 'Crop prices', icon: 'prices' },
 ]
 
 export default function AppShell() {
@@ -69,7 +71,7 @@ export default function AppShell() {
               Sign out
             </button>
           </div>
-          <nav className="mt-3 flex gap-1">
+          <nav className="mt-3 flex flex-wrap gap-1">
             {nav.map((item) => (
               <NavLink
                 key={item.to}

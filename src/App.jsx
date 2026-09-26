@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Fields from './pages/Fields'
 import FieldDetail from './pages/FieldDetail'
 import FieldEditor from './pages/FieldEditor'
+import Prices from './pages/Prices'
 import AppShell from './components/AppShell'
 import { useFarm } from './state/FarmContext'
 
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/fields/new" element={<FieldEditor />} />
         <Route path="/fields/:id" element={<FieldDetail />} />
         <Route path="/fields/:id/edit" element={<FieldEditor />} />
+        <Route path="/prices" element={<Prices />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

@@ -1,8 +1,21 @@
 import { Link } from 'react-router'
 import { cropName } from '../../lib/crops'
-import { rands, tonnes, timeAgo } from '../../lib/format'
+import { rands, shortDate, tonnes, timeAgo } from '../../lib/format'
+import { sourceLabels } from '../../services/prices'
 import { useFarm } from '../../state/FarmContext'
 import PriorityBadge from './PriorityBadge'
+import WorthItPanel from './WorthItPanel'
+
+const addPrice = (
+  <Link to="/prices" className="font-medium text-leaf-700 hover:underline">
+    Add a price
+  </Link>
+)
+
+function priceNote(price) {
+  const label = sourceLabels[price.source] ?? price.source
+  return price.asOf ? `${label}, ${shortDate(price.asOf)}` : label
+}
 
 function Row({ label, value, strong }) {
   return (
@@ -42,16 +55,38 @@ export default function RecommendationCard({ risk, showFieldLink = true }) {
 
       <dl className="divide-y divide-wheat/60 px-5 py-2">
         <Row label="Affected area" value={`${risk.affectedHa} ha`} />
-        <Row label="Expected yield" value={`${field.expectedYield} t/ha`} />
-        <Row label="Risk scenario" value={`${risk.scenarioPct}% yield loss`} />
-        <Row label="Estimated yield at risk" value={tonnes(risk.yieldAtRisk)} strong />
-        <Row label="Crop value" value={`${rands(field.cropPrice)} / t`} />
-        <Row label="Estimated revenue exposure" value={rands(risk.revenueExposure)} strong />
+        <Row label="Your expected yield" value={`${field.expectedYield} t/ha`} />
+        <Row label="Possible loss in this area (estimate)" value={`${risk.scenarioPct}%`} />
+        <Row label="Crop you could lose (estimate)" value={tonnes(risk.yieldAtRisk)} strong />
+        <Row
+          label="Crop price"
+          value={
+            risk.price ? (
+              <>
+                {rands(risk.price.pricePerTon)} / t
+                <span className="block text-xs font-normal text-soil-400">{priceNote(risk.price)}</span>
+              </>
+            ) : (
+              addPrice
+            )
+          }
+        />
+        <Row
+          label={
+            <>
+              Income you could miss out on
+              <span className="block text-xs text-soil-400">Revenue exposure, estimate</span>
+            </>
+          }
+          value={risk.revenueExposure === null ? addPrice : rands(risk.revenueExposure)}
+          strong
+        />
       </dl>
 
       <p className="mx-5 rounded-lg bg-linen px-3 py-2 text-xs text-soil-600">
-        <span className="font-semibold">AI scenario estimate.</span> {risk.affectedHa} ha × {field.expectedYield} t/ha ×{' '}
-        {risk.scenarioPct}% = {tonnes(risk.yieldAtRisk)}. Not yet validated against this farm's historical yields.
+        <span className="font-semibold">Rough estimate:</span> this area could lose about {tonnes(risk.yieldAtRisk)} (
+        {risk.affectedHa} ha × {field.expectedYield} t/ha × {risk.scenarioPct}%). Not yet checked against your past
+        harvests.
       </p>
 
       <div className="px-5 pt-4">
@@ -85,10 +120,14 @@ export default function RecommendationCard({ risk, showFieldLink = true }) {
         {risk.outlook && <p className="mt-2 text-sm text-soil-600">{risk.outlook}</p>}
       </div>
 
-      <div className="m-5 rounded-lg bg-leaf-800 p-4 text-linen">
+      <div className="mx-5 mt-5 rounded-lg bg-leaf-800 p-4 text-linen">
         <p className="text-xs font-semibold tracking-wide text-wheat uppercase">Recommended next step</p>
         <p className="mt-1 font-medium">{risk.nextStep}</p>
       </div>
+
+      {risk.plan && <WorthItPanel key={risk.key} risk={risk} />}
+
+      <div className="h-5" />
 
       <div className="space-y-2 px-5 pb-5">
         {!status && (

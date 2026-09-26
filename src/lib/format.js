@@ -1,10 +1,16 @@
+// Callers show an "Add a price" / "Add costs" prompt for missing numbers; this dash is only a safety net
+const MISSING = '—'
+const known = (value) => typeof value === 'number' && Number.isFinite(value)
+
 export function rands(value) {
+  if (!known(value)) return MISSING
   const sign = value < 0 ? '-' : ''
   return `${sign}R${Math.round(Math.abs(value)).toLocaleString('en-US')}`
 }
 
 // R2.84m / R184k, for tight spots like stat cards
 export function randsShort(value) {
+  if (!known(value)) return MISSING
   const abs = Math.abs(value)
   const sign = value < 0 ? '-' : ''
   if (abs >= 1_000_000) return `${sign}R${(abs / 1_000_000).toFixed(2)}m`
@@ -17,7 +23,14 @@ export function hectares(value) {
 }
 
 export function tonnes(value) {
-  return `${value.toLocaleString('en-US', { maximumFractionDigits: 1 })} t`
+  if (!known(value)) return MISSING
+  return `${value.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} t`
+}
+
+// Every R1 spent protects R3.80
+export function randsPerRand(value) {
+  if (!known(value)) return MISSING
+  return `R${value.toFixed(2)}`
 }
 
 export function shortDate(value) {

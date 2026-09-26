@@ -1,9 +1,10 @@
 // Starting values the field form pre-fills. Farmers overwrite these with their own numbers.
+// Prices live in services/prices.js.
 export const crops = {
-  maize: { name: 'Maize', yieldPerHa: 8, pricePerTon: 4000, seasonDays: 150 },
-  wheat: { name: 'Wheat', yieldPerHa: 5.5, pricePerTon: 5900, seasonDays: 140 },
-  soybean: { name: 'Soybean', yieldPerHa: 3, pricePerTon: 8200, seasonDays: 130 },
-  sunflower: { name: 'Sunflower', yieldPerHa: 2.2, pricePerTon: 8600, seasonDays: 125 },
+  maize: { name: 'Maize', yieldPerHa: 8, seasonDays: 150 },
+  wheat: { name: 'Wheat', yieldPerHa: 5.5, seasonDays: 140 },
+  soybean: { name: 'Soybean', yieldPerHa: 3, seasonDays: 130 },
+  sunflower: { name: 'Sunflower', yieldPerHa: 2.2, seasonDays: 125 },
 }
 
 export function cropName(key) {

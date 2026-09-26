@@ -10,7 +10,7 @@ const blank = {
   lon: '',
   plantingDate: '',
   expectedYield: String(crops.maize.yieldPerHa),
-  cropPrice: String(crops.maize.pricePerTon),
+  contractPrice: '',
   irrigated: false,
 }
 
@@ -28,13 +28,19 @@ function validate(v) {
   else if (new Date(v.plantingDate) > new Date()) errors.plantingDate = "Planting date can't be in the future."
 
   if (!(num(v.expectedYield) > 0)) errors.expectedYield = 'Enter an expected yield.'
-  if (!(num(v.cropPrice) > 0)) errors.cropPrice = 'Enter a price per tonne.'
+  if (v.contractPrice !== '' && !(num(v.contractPrice) > 0)) {
+    errors.contractPrice = 'Enter a price above R0, or leave it empty to use the market price.'
+  }
   return errors
 }
 
 export default function FieldForm({ initial, onSubmit, submitLabel = 'Save field', onCancel }) {
   const [values, setValues] = useState(() =>
-    initial ? Object.fromEntries(Object.entries({ ...blank, ...initial }).map(([k, v]) => [k, typeof v === 'number' ? String(v) : v])) : blank,
+    initial
+      ? Object.fromEntries(
+          Object.entries({ ...blank, ...initial }).map(([k, v]) => [k, v == null ? '' : typeof v === 'number' ? String(v) : v]),
+        )
+      : blank,
   )
   const [errors, setErrors] = useState({})
   const [locating, setLocating] = useState(false)
@@ -45,13 +51,12 @@ export default function FieldForm({ initial, onSubmit, submitLabel = 'Save field
 
   function update(e) {
     const { name, value, type, checked } = e.target
-    if (name === 'expectedYield' || name === 'cropPrice') setTouchedEconomics(true)
+    if (name === 'expectedYield') setTouchedEconomics(true)
 
     setValues((prev) => {
       const next = { ...prev, [name]: type === 'checkbox' ? checked : value }
       if (name === 'crop' && !touchedEconomics) {
         next.expectedYield = String(crops[value].yieldPerHa)
-        next.cropPrice = String(crops[value].pricePerTon)
       }
       return next
     })
@@ -96,7 +101,8 @@ export default function FieldForm({ initial, onSubmit, submitLabel = 'Save field
       lat: Number(values.lat),
       lon: Number(values.lon),
       expectedYield: Number(values.expectedYield),
-      cropPrice: Number(values.cropPrice),
+      // empty means "follow the market price on the Crop prices screen"
+      contractPrice: values.contractPrice === '' ? null : Number(values.contractPrice),
     })
   }
 
@@ -171,15 +177,16 @@ export default function FieldForm({ initial, onSubmit, submitLabel = 'Save field
           hint="Your usual yield for this field"
         />
         <Field
-          label="Crop price (R/t)"
-          name="cropPrice"
+          label="Contract price (R/t, optional)"
+          name="contractPrice"
           type="number"
           min="0"
           step="10"
-          value={values.cropPrice}
+          placeholder="Market price"
+          value={values.contractPrice}
           onChange={update}
-          error={errors.cropPrice}
-          hint="Contract or expected market price"
+          error={errors.contractPrice}
+          hint="Only if this crop is sold on contract. Leave empty to use the market price from Crop prices."
         />
       </div>
 

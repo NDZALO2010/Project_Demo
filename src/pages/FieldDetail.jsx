@@ -4,12 +4,15 @@ import RecommendationCard from '../components/dashboard/RecommendationCard'
 import WeatherPanel from '../components/dashboard/WeatherPanel'
 import PriorityBadge from '../components/dashboard/PriorityBadge'
 import { useMonitoring } from '../state/MonitoringContext'
+import { usePrices } from '../state/PriceContext'
+import { priceForField, sourceLabels } from '../services/prices'
 import { cropName, daysSincePlanting, growthStage } from '../lib/crops'
 import { rands, shortDate } from '../lib/format'
 
 export default function FieldDetail() {
   const { id } = useParams()
   const { byField } = useMonitoring()
+  const { prices } = usePrices()
   const info = byField[id]
 
   if (!info) {
@@ -25,13 +28,24 @@ export default function FieldDetail() {
 
   const { field, risk, satellite, weather, summary, pending } = info
 
+  const price = priceForField(field, prices)
+
   const facts = [
     ['Crop', cropName(field.crop)],
     ['Size', `${field.hectares} ha`],
     ['Planted', `${shortDate(field.plantingDate)} (${daysSincePlanting(field.plantingDate)} days)`],
     ['Growth stage', growthStage(field)],
     ['Expected yield', `${field.expectedYield} t/ha`],
-    ['Crop price', `${rands(field.cropPrice)} / t`],
+    [
+      'Crop price',
+      price ? (
+        `${rands(price.pricePerTon)} / t (${sourceLabels[price.source].toLowerCase()})`
+      ) : (
+        <Link to="/prices" className="font-medium text-leaf-700 hover:underline">
+          Add a price
+        </Link>
+      ),
+    ],
     ['Irrigation', field.irrigated ? 'Yes' : 'Dryland'],
     ['GPS', `${Number(field.lat).toFixed(4)}, ${Number(field.lon).toFixed(4)}`],
   ]

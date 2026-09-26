@@ -1,4 +1,5 @@
 import { growthStage } from './crops'
+import { revenueExposure as exposureFor, yieldAtRisk as yieldFor } from './finance'
 
 /*
   Crop risk + impact engine.
@@ -98,7 +99,8 @@ function outlookFor(type, w) {
   return null
 }
 
-export function detectRisk(field, w, satellite) {
+// price: { pricePerTon, asOf, source } from services/prices.js, or null when there isn't one yet
+export function detectRisk(field, w, satellite, price = null) {
   // a single low zone is usually cloud shadow or a headland, not a crop problem
   if (!w || !satellite || satellite.flaggedCount < 2) return null
 
@@ -114,12 +116,15 @@ export function detectRisk(field, w, satellite) {
   scenarioPct = Math.round(Math.min(20, Math.max(2, scenarioPct)) * 10) / 10
 
   const affectedHa = Math.round(satellite.flaggedHa * 10) / 10
-  const yieldAtRisk = affectedHa * field.expectedYield * (scenarioPct / 100)
-  const revenueExposure = yieldAtRisk * field.cropPrice
+  const yieldAtRisk = yieldFor(affectedHa, field.expectedYield, scenarioPct)
+  // null until the crop has a price
+  const revenueExposure = exposureFor(yieldAtRisk, price?.pricePerTon)
 
+  // Without a price we can only rank on the size of the loss
+  const rands = revenueExposure ?? 0
   let priority = 'Low'
-  if (revenueExposure >= 50_000 || scenarioPct >= 10) priority = 'High'
-  else if (revenueExposure >= 15_000) priority = 'Medium'
+  if (rands >= 50_000 || scenarioPct >= 10) priority = 'High'
+  else if (rands >= 15_000) priority = 'Medium'
 
   // The satellite decline is always one signal; each weather reading that agrees adds another.
   // Weather that doesn't explain the decline means we're guessing more.
@@ -136,6 +141,7 @@ export function detectRisk(field, w, satellite) {
     affectedHa,
     scenarioPct,
     yieldAtRisk,
+    price,
     revenueExposure,
     priority,
     confidence,
@@ -148,8 +154,8 @@ export function detectRisk(field, w, satellite) {
   }
 }
 
+// Problems without a price yet sort last within their priority
 export function rankRisks(list) {
-  return [...list].sort(
-    (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority] || b.revenueExposure - a.revenueExposure,
-  )
+  const rands = (r) => r.revenueExposure ?? -1
+  return [...list].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority] || rands(b) - rands(a))
 }

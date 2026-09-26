@@ -4,12 +4,7 @@ export default function Pipeline({ stages }) {
     <ol className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {stages.map((stage, i) => (
         <li key={stage.name} className="relative rounded-xl border border-wheat bg-white p-4">
-          <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-leaf-700 text-xs font-semibold text-linen">
-              {i + 1}
-            </span>
-            <span className="text-xs font-semibold tracking-widest text-leaf-700 uppercase">{stage.name}</span>
-          </div>
+          <span className="text-xs font-semibold tracking-widest text-leaf-700 uppercase">{stage.name}</span>
           <p className={`mt-3 font-serif text-2xl font-semibold ${stage.tone === 'risk' ? 'text-clay' : 'text-soil-900'}`}>
             {stage.value}
           </p>
