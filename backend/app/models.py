@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, String
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .db import Base
@@ -85,3 +85,21 @@ class PriceEntry(Base):
     crop: Mapped[str] = mapped_column(String(40), primary_key=True)
     price_per_ton: Mapped[float | None] = mapped_column(Float)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Translation(Base):
+    """A cached translation, shared by every user. Looked up by a SHA-256 of the original text,
+    because PostgreSQL can't put a unique index on arbitrarily long text.
+    provider is 'google', or 'human' for a row someone corrected by hand."""
+
+    __tablename__ = 'translations'
+    __table_args__ = (UniqueConstraint('source_language', 'target_language', 'source_hash'),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_language: Mapped[str] = mapped_column(String(8))
+    target_language: Mapped[str] = mapped_column(String(8))
+    source_hash: Mapped[str] = mapped_column(String(64))
+    original_text: Mapped[str] = mapped_column(Text)
+    translated_text: Mapped[str] = mapped_column(Text)
+    provider: Mapped[str] = mapped_column(String(20), default='google')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

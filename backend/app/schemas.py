@@ -159,3 +159,24 @@ class CostOverrideIn(BaseModel):
 class PriceIn(Camel):
     # null clears the price so the app asks for one
     price_per_ton: float | None = Field(default=None, ge=0)
+
+
+# ---------- translation ----------
+
+# South Africa's official spoken languages (ISO 639-1, or 639-3 where there's no two-letter code).
+# Keep in step with LANGUAGES in frontend/src/state/LanguageContext.jsx
+Language = Literal['en', 'af', 'nr', 'xh', 'zu', 'nso', 'st', 'tn', 'ss', 've', 'ts']
+
+
+class TranslateIn(Camel):
+    source: Language = 'en'
+    target: Language
+    # the limits are checked in the router, where they come from settings
+    texts: list[str] = Field(min_length=1)
+
+
+class TranslateOut(Camel):
+    target: Language
+    # one per input text, in order; None where no translation is available yet,
+    # and the frontend shows the original instead
+    translations: list[str | None]

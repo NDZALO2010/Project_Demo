@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .db import Base, engine
-from .routers import auth, farm, prices, weather
+from .routers import auth, farm, prices, translate, weather
 
 
 @asynccontextmanager
@@ -24,7 +24,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-for module in (auth, farm, prices, weather):
+for module in (auth, farm, prices, translate, weather):
     app.include_router(module.router, prefix='/api')
 
 

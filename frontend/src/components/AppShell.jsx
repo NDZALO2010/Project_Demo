@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router'
 import Logo from './Logo'
 import { useFarm } from '../state/FarmContext'
 import { useAuth } from '../state/AuthContext'
+import { useT } from '../state/LanguageContext'
 
 const icons = {
   dashboard: 'M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z',
@@ -28,6 +29,7 @@ const nav = [
 export default function AppShell() {
   const { farm, syncError } = useFarm()
   const { logout } = useAuth()
+  const t = useT()
 
   return (
     <div className="flex min-h-screen">
@@ -49,7 +51,7 @@ export default function AppShell() {
               }
             >
               <Icon name={item.icon} />
-              {item.label}
+              {t(item.label)}
             </NavLink>
           ))}
         </nav>
@@ -58,7 +60,7 @@ export default function AppShell() {
           <p className="truncate text-sm font-medium text-linen">{farm?.name}</p>
           <p className="truncate text-xs">{farm?.region}</p>
           <button onClick={logout} className="mt-3 text-xs font-medium text-wheat hover:underline">
-            Sign out
+            {t('Sign out')}
           </button>
         </div>
       </aside>
@@ -69,7 +71,7 @@ export default function AppShell() {
           <div className="flex items-center justify-between">
             <Logo />
             <button onClick={logout} className="text-sm font-medium text-leaf-700">
-              Sign out
+              {t('Sign out')}
             </button>
           </div>
           <nav className="mt-3 flex flex-wrap gap-1">
@@ -82,7 +84,7 @@ export default function AppShell() {
                   `rounded-full px-3 py-1 text-sm font-medium ${isActive ? 'bg-leaf-700 text-linen' : 'text-soil-600'}`
                 }
               >
-                {item.label}
+                {t(item.label)}
               </NavLink>
             ))}
           </nav>
@@ -91,7 +93,7 @@ export default function AppShell() {
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {syncError && (
             <p role="alert" className="mb-4 rounded-lg bg-clay/10 px-4 py-3 text-sm text-clay">
-              Your last change wasn't saved: {syncError}
+              {t("Your last change wasn't saved: {error}", { error: syncError })}
             </p>
           )}
           <Outlet />

@@ -27,9 +27,18 @@ npm run test:api    # pytest, against its own agrinexus_test database
 
 Settings are listed in `.env.example`. Set `AGRINEXUS_SECRET_KEY` anywhere real people log in, and change the database password anywhere that isn't your own machine.
 
+## Translation
+
+The UI is written in English and wrapped in `t('...')` (`frontend/src/state/LanguageContext.jsx`). For any other language the frontend batches the strings on screen into one `POST /api/translate`. The API answers from the `translations` table, sends only the misses to Google Cloud Translation, and stores the results, so each string is paid for once per language and then shared by every user.
+
+- Set `AGRINEXUS_GOOGLE_TRANSLATE_API_KEY` (in `backend/.env`, or in the Vercel project settings). The key never reaches the browser.
+- The endpoint is public, because the login page has a language switcher. It caps each request's size and each IP's uncached characters per hour, but that count is per server instance, so also set a quota on the key in Google Cloud.
+- If Google is unreachable or the key is missing, untranslated strings come back as `null` and the app shows English.
+- Machine translation of isiNdebele, siSwati and Tshivenḓa in particular can be rough. To correct one, update `translated_text` and set `provider = 'human'` on its row. Browsers pick up the change within 7 days, when their local copy expires.
+
 ## Endpoints
 
-All under `/api`. Everything except register, login and health needs `Authorization: Bearer <token>`. JSON is camelCase.
+All under `/api`. Everything except register, login, translate and health needs `Authorization: Bearer <token>`. JSON is camelCase.
 
 | Method | Path | What it does |
 | --- | --- | --- |
@@ -48,6 +57,7 @@ All under `/api`. Everything except register, login and health needs `Authorizat
 | GET | `/prices` | The prices the farmer has entered |
 | PUT | `/prices/{crop}` | Set a price per tonne, or `null` to clear it |
 | GET | `/weather?lat=&lon=` | Open-Meteo: 14 days back, 7 ahead, cached per ~10 km for 30 min |
+| POST | `/translate` | `{ source?: "en", target, texts[] }` → `{ target, translations[] }`, cached in the `translations` table |
 | GET | `/health` | Liveness check |
 
 The schema is created with `create_all` on startup. Switch to Alembic migrations before the schema needs to change under real data.

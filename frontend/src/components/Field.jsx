@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { useT } from '../state/LanguageContext'
 
 const baseInput =
   'w-full rounded-lg border bg-white px-3.5 py-2.5 text-soil-900 placeholder:text-soil-400/70 ' +
@@ -34,11 +35,12 @@ export function Field({ label, error, hint, className = '', children, ...props }
   )
 }
 
-export function PasswordField({ label = 'Password', error, hint, ...props }) {
+export function PasswordField({ label, error, hint, ...props }) {
+  const t = useT()
   const [visible, setVisible] = useState(false)
 
   return (
-    <Field label={label} error={error} hint={hint}>
+    <Field label={label ?? t('Password')} error={error} hint={hint}>
       {({ id, className }) => (
         <div className="relative">
           <input
@@ -53,7 +55,7 @@ export function PasswordField({ label = 'Password', error, hint, ...props }) {
             onClick={() => setVisible((v) => !v)}
             className="absolute inset-y-0 right-0 px-3.5 text-sm font-medium text-leaf-700 hover:text-leaf-900"
           >
-            {visible ? 'Hide' : 'Show'}
+            {visible ? t('Hide') : t('Show')}
           </button>
         </div>
       )}
@@ -61,14 +63,15 @@ export function PasswordField({ label = 'Password', error, hint, ...props }) {
   )
 }
 
-export function SubmitButton({ loading, children, loadingText = 'Please wait…' }) {
+export function SubmitButton({ loading, children, loadingText }) {
+  const t = useT()
   return (
     <button
       type="submit"
       disabled={loading}
       className="w-full rounded-lg bg-leaf-700 px-4 py-3 font-medium text-linen transition hover:bg-leaf-800 focus:outline-none focus:ring-4 focus:ring-leaf-500/25 disabled:cursor-not-allowed disabled:opacity-70"
     >
-      {loading ? loadingText : children}
+      {loading ? (loadingText ?? t('Please wait…')) : children}
     </button>
   )
 }

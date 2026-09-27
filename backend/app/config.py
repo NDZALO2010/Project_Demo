@@ -32,6 +32,15 @@ class Settings(BaseSettings):
     # Weather for a ~10 km square barely changes within half an hour
     weather_cache_minutes: int = 30
 
+    # Google Cloud Translation (Basic, v2). Server side only: the browser never sees it.
+    # Without it /api/translate still serves whatever is already cached.
+    google_translate_api_key: str | None = None
+    # /api/translate is public (the login page has a language switcher), so cap what one caller
+    # can send to the paid API. The hard limit belongs in the Google Cloud quota settings.
+    translate_max_texts: int = 200
+    translate_max_text_chars: int = 1000
+    translate_chars_per_hour: int = 50_000  # uncached characters per client IP, per instance
+
     @field_validator('database_url')
     @classmethod
     def _use_psycopg(cls, url: str) -> str:
