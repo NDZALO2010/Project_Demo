@@ -1,0 +1,31 @@
+# PostgreSQL for the AgriNexus backend.
+#   docker compose up -d db      start it (data survives restarts in the agrinexus-db volume)
+#   docker compose down          stop it
+#   docker compose down -v       stop it and delete the data
+#
+# Published on host port 5433, because a PostgreSQL installed directly on Windows
+# usually already holds 5432.
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: agrinexus-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agrinexus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agrinexus}
+      POSTGRES_DB: ${POSTGRES_DB:-agrinexus}
+    ports:
+      - '${POSTGRES_PORT:-5433}:5432'
+    volumes:
+      - agrinexus-db:/var/lib/postgresql/data
+      # creates the separate database the tests use
+      - ./backend/docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  agrinexus-db:
