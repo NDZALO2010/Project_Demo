@@ -1,4 +1,7 @@
+import os
+
 from sqlalchemy import create_engine, event
+from sqlalchemy.pool import NullPool
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from .config import settings
@@ -11,6 +14,9 @@ engine = create_engine(
     connect_args={'check_same_thread': False} if IS_SQLITE else {'connect_timeout': 5},
     # drop connections PostgreSQL closed while idle (e.g. after the container restarts)
     pool_pre_ping=not IS_SQLITE,
+    # on Vercel each function instance is short-lived: open a connection per request rather than
+    # holding idle ones the database would have to keep (use the provider's pooled URL)
+    **({'poolclass': NullPool} if os.environ.get('VERCEL') else {}),
 )
 
 if IS_SQLITE:
